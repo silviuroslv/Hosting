@@ -1,26 +1,24 @@
 #!/bin/bash
  
-# Set non-interactive for timezone
-export DEBIAN_FRONTEND=noninteractive
-ln -fs /usr/share/zoneinfo/Asia/Kathmandu /etc/localtime
-dpkg-reconfigure -f noninteractive tzdata
- 
-# Install tmate and expect
-apt-get update
-apt-get install -y tmate expect
+# Start dummy HTTP server to keep Render Web Service alive
+python3 -m http.server 8080 &
  
 # Start tmate in background
 tmate -S /tmp/tmate.sock new-session -d
+ 
+# Wait for tmate to be ready
 tmate -S /tmp/tmate.sock wait tmate-ready
  
-# Print SSH and Web (read-write) session links
-echo "SSH access:"
+# Print SSH and web access link
+echo "=============================="
+echo "✅ Tmate SSH session ready:"
 tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
-echo "Web access (read-write):"
+echo "🌐 Web URL:"
 tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
+echo "=============================="
  
-# Auto type to keep it alive
+# Keep service running forever
 while true; do
-    tmate -S /tmp/tmate.sock send-keys "echo alive && date" C-m
+    echo "💤 Still alive: $(date)"
     sleep 300
 done
